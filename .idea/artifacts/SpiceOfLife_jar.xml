@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="SpiceOfLife:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/SpiceOfLife_jar</output-path>
+    <root id="archive" name="SpiceOfLife.jar">
+      <element id="module-output" name="SpiceOfLife" />
+    </root>
+  </artifact>
+</component>

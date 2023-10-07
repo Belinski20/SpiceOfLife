@@ -1,0 +1,17 @@
+name: SpiceOfLife
+version: '${project.version}'
+main: com.belinski20.spiceoflife.SpiceOfLife
+api-version: '1.20'
+depend: [ProtocolLib]
+
+commands:
+  opt:
+    permission-message: Do not have valid permissions to use
+    description: Enable/Disable spiceoflife
+    permission: spiceoflife.opt
+    usage: /opt
+  solreload:
+    permission-message: Do not have valid permissions to use
+    description: Reloads Config and Food Values of SpiceOfLife
+    permission: spiceoflife.solreload
+    usage: /solreload
