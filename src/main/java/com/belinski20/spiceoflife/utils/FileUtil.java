@@ -1,9 +1,8 @@
 package com.belinski20.spiceoflife.utils;
 
 
-import com.belinski20.spiceoflife.Config;
-import com.belinski20.spiceoflife.FoodStats;
-import com.belinski20.spiceoflife.PlayerFood;
+import com.belinski20.spiceoflife.playerdata.FoodStats;
+import com.belinski20.spiceoflife.playerdata.PlayerFood;
 import com.belinski20.spiceoflife.SpiceOfLife;
 import org.bukkit.*;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -18,6 +17,8 @@ import java.util.*;
 public class FileUtil{
 
     private static Plugin plugin = SpiceOfLife.spiceOfLife;
+    private String foodAmount = "Food.material.foodAmount";
+    private String saturation = "Food.material.saturation";
     public FileUtil()
     {
         createDirectory();
@@ -43,8 +44,8 @@ public class FileUtil{
                 {
                     if(mat.isEdible())
                     {
-                        config.set("Food." + mat.toString() + ".foodAmount", 1);
-                        config.set("Food." + mat.toString() + ".saturation", 1);
+                        config.set(foodAmount.replace("material", mat.toString()), 1);
+                        config.set(saturation.replace("material", mat.toString()), 1);
                     }
                 }
                 config.save(file);
@@ -60,14 +61,14 @@ public class FileUtil{
         if(file.exists())
         {
             config = YamlConfiguration.loadConfiguration(file);
-            Config.optIn = config.getBoolean("OptIn");
-            Config.foodHistoryAmount = config.getInt("FoodAmounts");
+            FoodInfo.optIn = config.getBoolean("OptIn");
+            FoodInfo.foodHistoryAmount = config.getInt("FoodAmounts");
 
-            Config.foodValues.clear();
+            FoodInfo.foodValues.clear();
             for(String matName : config.getConfigurationSection("Food").getKeys(false))
             {
-                FoodStats foodStats = new FoodStats(config.getInt("Food." + matName + ".foodAmount"), (float)config.getDouble("Food." + matName + ".saturation"));
-                Config.foodValues.put(matName, foodStats);
+                FoodStats foodStats = new FoodStats(config.getInt(foodAmount.replace("material", matName)), (float)config.getDouble(saturation.replace("material", matName)));
+                FoodInfo.foodValues.put(matName, foodStats);
             }
         }
     }

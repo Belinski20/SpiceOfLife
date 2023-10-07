@@ -3,13 +3,15 @@ package com.belinski20.spiceoflife;
 import com.belinski20.spiceoflife.commands.OptCommand;
 import com.belinski20.spiceoflife.commands.ReloadCommand;
 import com.belinski20.spiceoflife.listeners.SpiceOfLifeListeners;
+import com.belinski20.spiceoflife.playerdata.PlayerManager;
+import com.belinski20.spiceoflife.utils.FoodInfo;
 import com.belinski20.spiceoflife.utils.FileUtil;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class SpiceOfLife extends JavaPlugin {
 
     public static SpiceOfLife spiceOfLife;
-    public Config config;
+    public FoodInfo foodInfo;
     public FileUtil fileUtil;
     public PlayerManager manager;
 
@@ -17,7 +19,7 @@ public final class SpiceOfLife extends JavaPlugin {
     public void onEnable() {
         // Plugin startup logic
         spiceOfLife = this;
-        config = new Config();
+        foodInfo = new FoodInfo();
         manager = new PlayerManager();
         fileUtil = new FileUtil();
         getCommand("opt").setExecutor(new OptCommand());
@@ -27,6 +29,6 @@ public final class SpiceOfLife extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
+        manager.saveAllPlayers();
     }
 }

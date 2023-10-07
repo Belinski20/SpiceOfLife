@@ -1,6 +1,6 @@
 package com.belinski20.spiceoflife.commands;
 
-import com.belinski20.spiceoflife.LoreComponents;
+import com.belinski20.spiceoflife.utils.Messages;
 import com.belinski20.spiceoflife.SpiceOfLife;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -16,7 +16,7 @@ public class ReloadCommand implements TabExecutor {
 
         SpiceOfLife.spiceOfLife.fileUtil.loadConfigFile();
 
-        sender.sendMessage(LoreComponents.makeMessage("[SpiceOfLife] reloaded!"));
+        sender.sendMessage(Messages.makeMessage(Messages.reloadSpiceOfLife));
         return true;
     }
 

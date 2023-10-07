@@ -1,6 +1,10 @@
 package com.belinski20.spiceoflife.listeners;
 
 import com.belinski20.spiceoflife.*;
+import com.belinski20.spiceoflife.playerdata.FoodStats;
+import com.belinski20.spiceoflife.playerdata.PlayerFood;
+import com.belinski20.spiceoflife.utils.FoodInfo;
+import com.belinski20.spiceoflife.utils.Messages;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.ListenerPriority;
@@ -63,24 +67,24 @@ public class SpiceOfLifeListeners implements Listener {
 
                         ItemMeta meta = item.getItemMeta();
                         List<Component> lore = new LinkedList<>();
-                        lore.add(LoreComponents.makeMessage(LoreComponents.foodFoodValue
-                                .replace("#", "" + foodFormat.format(Config.getCurrentFoodValueForItem(item.getType(), playerFood.amountTimeEaten(item.getType())))))
+                        lore.add(Messages.makeMessage(Messages.foodFoodValue
+                                .replace("#", "" + foodFormat.format(FoodInfo.getCurrentFoodValueForItem(item.getType(), playerFood.amountTimeEaten(item.getType())))))
                                 .color(NamedTextColor.GRAY)
                                 .decoration(TextDecoration.ITALIC, false)
-                                .append(LoreComponents.makeMessage(LoreComponents.foodFoodValueIcon)
+                                .append(Messages.makeMessage(Messages.foodFoodValueIcon)
                                         .color(NamedTextColor.RED)
                                         .decoration(TextDecoration.ITALIC, false)));
 
-                        lore.add(LoreComponents.makeMessage(LoreComponents.foodNutrition)
+                        lore.add(Messages.makeMessage(Messages.foodNutrition)
                                 .color(NamedTextColor.GRAY)
                                 .decoration(TextDecoration.ITALIC, false)
-                                .append(LoreComponents.makeMessage("" + nutritionFormat.format(Config.getCurrentNutritionalValueForItem(item.getType(), playerFood.amountTimeEaten(item.getType())) * 100) + "%"))
+                                .append(Messages.makeMessage("" + nutritionFormat.format(FoodInfo.getCurrentNutritionalValueForItem(item.getType(), playerFood.amountTimeEaten(item.getType())) * 100) + "%"))
                                 .color(NamedTextColor.GOLD)
                                 .decoration(TextDecoration.ITALIC, false));
 
-                        lore.add(LoreComponents.makeMessage(LoreComponents.lastEatenAmount
+                        lore.add(Messages.makeMessage(Messages.lastEatenAmount
                                 .replace("#", "" + playerFood.amountTimeEaten(item.getType()))
-                                .replace("TOTAL", "" + Config.foodHistoryAmount))
+                                .replace("TOTAL", "" + FoodInfo.foodHistoryAmount))
                                 .color(NamedTextColor.AQUA));
 
                         meta.lore(lore);
@@ -106,31 +110,30 @@ public class SpiceOfLifeListeners implements Listener {
     }
 
     @EventHandler
-    public void onShiftClick(InventoryClickEvent event) throws InvocationTargetException {
+    public void onShiftClick(InventoryClickEvent event){
         if(!event.getClick().isShiftClick())
             return;
 
         Player player = (Player)event.getWhoClicked();
 
-        PacketContainer packetWindow = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.WINDOW_ITEMS);
-        packetWindow.getItemListModifier().write(0, Arrays.asList(player.getInventory().getContents()));
-        ProtocolLibrary.getProtocolManager().sendServerPacket(player, packetWindow);
+        if(!spiceOfLife.manager.contains(player))
+            return;
+
+        sendPacket(player);
     }
 
     @EventHandler
-    public void onInventorySlotChange(PlayerInventorySlotChangeEvent event) throws InvocationTargetException {
+    public void onInventorySlotChange(PlayerInventorySlotChangeEvent event){
         Player player = event.getPlayer();
 
         if(!spiceOfLife.manager.contains(player))
             return;
 
-        PacketContainer packetWindow = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.WINDOW_ITEMS);
-        packetWindow.getItemListModifier().write(0, Arrays.asList(player.getInventory().getContents()));
-        ProtocolLibrary.getProtocolManager().sendServerPacket(player, packetWindow);
+        sendPacket(player);
     }
 
     @EventHandler
-    public void onItemPickup(EntityPickupItemEvent event) throws InvocationTargetException {
+    public void onItemPickup(EntityPickupItemEvent event){
         if(!(event.getEntity() instanceof Player))
             return;
 
@@ -139,9 +142,7 @@ public class SpiceOfLifeListeners implements Listener {
         if(!spiceOfLife.manager.contains(player))
             return;
 
-        PacketContainer packetWindow = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.WINDOW_ITEMS);
-        packetWindow.getItemListModifier().write(0, Arrays.asList(player.getInventory().getContents()));
-        ProtocolLibrary.getProtocolManager().sendServerPacket(player, packetWindow);
+        sendPacket(player);
     }
 
     @EventHandler
@@ -155,7 +156,7 @@ public class SpiceOfLifeListeners implements Listener {
         PlayerFood pf = SpiceOfLife.spiceOfLife.manager.getPlayerFood(player);
         FoodStats foodStats = pf.foodStats(event.getItem());
         Material mat = event.getItem().getType();
-        event.setFoodLevel(player.getFoodLevel() + (int)(Config.getCurrentFoodValueForItem(mat, pf.amountTimeEaten(mat)) * 2));
+        event.setFoodLevel(player.getFoodLevel() + (int)(FoodInfo.getCurrentFoodValueForItem(mat, pf.amountTimeEaten(mat)) * 2));
         player.setSaturation(player.getSaturation() + foodStats.getSaturation());
 
         pf.addFood(event.getItem().getType());
@@ -164,12 +165,26 @@ public class SpiceOfLifeListeners implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event)
     {
-        if(Config.optIn == true)
+        if(FoodInfo.optIn == true)
             return;
 
         Player player = event.getPlayer();
 
-        player.sendMessage(LoreComponents.makeMessage("Spice of Life is active on this server!"));
+        player.sendMessage(Messages.makeMessage(Messages.configDenyOptInSpiceOfLife));
         SpiceOfLife.spiceOfLife.manager.add(player);
+
+        sendPacket(player);
+    }
+
+    private void sendPacket(Player player)
+    {
+        PacketContainer packetWindow = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.WINDOW_ITEMS);
+        packetWindow.getItemListModifier().write(0, Arrays.asList(player.getInventory().getContents()));
+        try {
+            ProtocolLibrary.getProtocolManager().sendServerPacket(player, packetWindow);
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
+        player.updateInventory();
     }
 }
