@@ -153,11 +153,13 @@ public class SpiceOfLifeListeners implements Listener {
         if(!spiceOfLife.manager.contains(player))
             return;
 
+        if(event.getItem() == null)
+            return;
+
         PlayerFood pf = SpiceOfLife.spiceOfLife.manager.getPlayerFood(player);
-        FoodStats foodStats = pf.foodStats(event.getItem());
         Material mat = event.getItem().getType();
         event.setFoodLevel(player.getFoodLevel() + (int)(FoodInfo.getCurrentFoodValueForItem(mat, pf.amountTimeEaten(mat)) * 2));
-        player.setSaturation(player.getSaturation() + foodStats.getSaturation());
+        player.setSaturation(player.getSaturation() + (float)(FoodInfo.getCurrentSaturationForItem(mat, pf.amountTimeEaten(mat)) * 2));
 
         pf.addFood(event.getItem().getType());
     }

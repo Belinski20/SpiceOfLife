@@ -32,4 +32,14 @@ public class FoodInfo {
 
         return (double)Math.round(getCurrentNutritionalValueForItem(material, eatenAmount) * stat.getFoodLevel()) / (double)2;
     }
+
+    public static double getCurrentSaturationForItem(Material material, int eatenAmount)
+    {
+        String foodName = material.name();
+        FoodStats stat = foodValues.get(foodName);
+        if(stat == null)
+            return 0;
+
+        return (double)Math.round(getCurrentNutritionalValueForItem(material, eatenAmount) * stat.getSaturation()) / (double)2;
+    }
 }
